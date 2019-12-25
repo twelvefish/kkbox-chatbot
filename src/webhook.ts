@@ -4,6 +4,10 @@ import * as Line from '@line/bot-sdk'
 import { LineConfig } from './config'
 import { WebhookEvent } from '@line/bot-sdk'
 
+import * as config from './config'
+const lineClient = new Line.Client(config.LineConfig)
+import * as fs from 'fs'
+
 var router = express.Router()
 
 router.use(function (req, res, next) {
@@ -16,6 +20,26 @@ router.post('/webhook', Line.middleware(LineConfig), (req, res) => {
     let responseArray: Promise<any>[] = []
     events.forEach(event => {
         console.log(JSON.stringify(event, null, 4));
+        switch (event.type) {
+            case 'message':
+                switch(event.message.type){
+                    case 'text':
+                        console.log("text",event.message.text);
+                        break;
+                    case 'audio':
+                        console.log("audio",event.message.id);
+                        lineClient.getMessageContent(event.message.id).then(stream =>{
+                            let buffers:Buffer[] = [];
+                            stream.on('data',(data:Buffer) =>buffers.push(data));
+                            stream.on('end', () => {
+                                fs.writeFileSync('./test2.mp3', Buffer.concat(buffers));
+                            })
+                        })
+                        break;
+                }
+                break;
+
+        }
     })
 
     Promise
