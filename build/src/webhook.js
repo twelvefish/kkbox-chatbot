@@ -13,6 +13,7 @@ const config_1 = require("./config");
 const config = __importStar(require("./config"));
 const lineClient = new Line.Client(config.LineConfig);
 const fs = __importStar(require("fs"));
+const kkbox = __importStar(require("../service/kkbox"));
 var router = express.Router();
 router.use(function (req, res, next) {
     console.log("輸出記錄訊息至終端機", req.method, req.url);
@@ -53,5 +54,8 @@ router.post('/webhook', Line.middleware(config_1.LineConfig), (req, res) => {
         console.error("err", err);
         res.status(500).end();
     });
+});
+router.post('/kkbox', (req, res) => {
+    kkbox.getKKBOXAuthorize();
 });
 module.exports = router;

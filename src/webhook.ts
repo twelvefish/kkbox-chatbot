@@ -8,6 +8,7 @@ import * as config from './config'
 const lineClient = new Line.Client(config.LineConfig)
 import * as fs from 'fs'
 
+import * as kkbox from '../service/kkbox'
 var router = express.Router()
 
 router.use(function (req, res, next) {
@@ -22,15 +23,15 @@ router.post('/webhook', Line.middleware(LineConfig), (req, res) => {
         console.log(JSON.stringify(event, null, 4));
         switch (event.type) {
             case 'message':
-                switch(event.message.type){
+                switch (event.message.type) {
                     case 'text':
-                        console.log("text",event.message.text);
+                        console.log("text", event.message.text);
                         break;
                     case 'audio':
-                        console.log("audio",event.message.id);
-                        lineClient.getMessageContent(event.message.id).then(stream =>{
-                            let buffers:Buffer[] = [];
-                            stream.on('data',(data:Buffer) =>buffers.push(data));
+                        console.log("audio", event.message.id);
+                        lineClient.getMessageContent(event.message.id).then(stream => {
+                            let buffers: Buffer[] = [];
+                            stream.on('data', (data: Buffer) => buffers.push(data));
                             stream.on('end', () => {
                                 fs.writeFileSync('./test2.mp3', Buffer.concat(buffers));
                             })
@@ -52,6 +53,10 @@ router.post('/webhook', Line.middleware(LineConfig), (req, res) => {
             console.error("err", err)
             res.status(500).end()
         })
+})
+
+router.post('/kkbox', (req, res) => {
+    kkbox.getKKBOXAuthorize()
 })
 
 module.exports = router
